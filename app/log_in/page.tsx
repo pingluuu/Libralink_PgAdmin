@@ -33,7 +33,7 @@ export default function Login() {
         // Redirect to the main page (home page)
         router.push("/");
       } else {
-        setError(data.message || "Invalid Student ID or Password.");
+        setError(data.error || "Invalid Student ID or Password.");
       }
     } catch (err) {
       console.error("Login error:", err);

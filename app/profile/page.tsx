@@ -27,7 +27,7 @@ export default function ProfilePage() {
     if (typeof window !== "undefined") {
       const loggedIn = localStorage.getItem("loggedIn");
       const id = localStorage.getItem("studentID");
-      const name = localStorage.getItem("ame");
+      const name = localStorage.getItem("studentName");
 
       if (loggedIn === "true" && id) {
         setStudentID(id);

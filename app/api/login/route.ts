@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
     // Query the database
     const result = await pool.query(
-      "SELECT * FROM students WHERE student_id = $1 AND password = $2",
+      "SELECT name FROM students WHERE student_id = $1 AND password = $2",
       [studentID, password]
     );
 
@@ -24,10 +24,15 @@ export async function POST(req: Request) {
       return new Response(JSON.stringify({ error: "Invalid credentials" }), { status: 401 });
     }
 
-    return new Response(JSON.stringify({ success: true, message: "Login successful" }), { status: 200 });
+    const { name } = result.rows[0];
+
+    return new Response(
+      JSON.stringify({ success: true, message: "Login successful", name }),
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("Error in /api/login:", error.message);
+    const err = error as Error;
+    console.error("Error in /api/login:", err.message);
     return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500 });
   }
 }
-
