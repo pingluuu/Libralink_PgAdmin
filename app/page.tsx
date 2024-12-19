@@ -8,11 +8,11 @@ import styles from "./page.module.css";
 // Define the Room type
 interface Room {
   id: number;
-  library: string;
-  roomNumber: string;
+  libraryname: string;
+  roomnumber: string;
   date: string;
-  startTime: string;
-  endTime: string;
+  starttime: string;
+  endtime: string;
 }
 
 export default function Home() {
@@ -89,7 +89,7 @@ export default function Home() {
   };
 
   const handleBookRoom = (room: Room) => {
-    alert(`You have booked Room ${room.roomNumber} at ${room.library}`);
+    alert(`You have booked Room ${room.roomnumber} at ${room.libraryname}`);
   };
 
   const Header = () => (
@@ -186,10 +186,10 @@ export default function Home() {
           {rooms.map((room) => (
             <li key={room.id} className={styles.roomItem}>
               <div>
-                <strong>Library:</strong> {room.library} <br />
-                <strong>Room:</strong> {room.roomNumber} <br />
-                <strong>Date:</strong> {room.date} <br />
-                <strong>Time:</strong> {room.startTime} - {room.endTime} <br />
+                <strong>Library:</strong> {room.libraryname} <br />
+                <strong>Room:</strong> {room.roomnumber} <br />
+                <strong>Date:</strong> {new Date(room.date).toLocaleDateString()} <br />
+                <strong>Time:</strong> {room.starttime} - {room.endtime}
               </div>
               <button
                 className={styles.bookButton}
@@ -205,6 +205,7 @@ export default function Home() {
       )}
     </div>
   );
+  
   
 
   const Footer = () => (
