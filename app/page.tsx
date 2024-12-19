@@ -88,9 +88,44 @@ export default function Home() {
     }
   };
 
-  const handleBookRoom = (room: Room) => {
-    alert(`You have booked Room ${room.roomnumber} at ${room.libraryname}`);
+  const handleBookRoom = async (room: Room) => {
+    const studentId = localStorage.getItem("studentID");
+  
+    if (!studentId) {
+      alert("Please log in to book a room.");
+      router.push("/log_in");
+      return;
+    }
+  
+    try {
+      const response = await fetch("/api/book", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          studentId,
+          roomId: room.id, // Use `id` from Room type
+          date: room.date, // Use `date` from Room type
+          startTime: room.starttime, // Use `starttime` from Room type
+          endTime: room.endtime, // Use `endtime` from Room type
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok && data.success) {
+        alert("Room booked successfully!");
+      } else {
+        alert(data.error || "Failed to book the room.");
+      }
+    } catch (error) {
+      console.error("Booking error:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
+  
+  
 
   const Header = () => (
     <header className={styles.header}>
