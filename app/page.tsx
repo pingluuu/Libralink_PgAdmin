@@ -1,6 +1,5 @@
 "use client";
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,34 +10,15 @@ interface Room {
   id: number;
   library: string;
   roomNumber: string;
-  capacity: number;
-  openTime: string;
-  closeTime: string;
+  date: string;
+  startTime: string;
+  endTime: string;
 }
 
 export default function Home() {
   const router = useRouter();
 
-  // State Hooks
-  const [selectedLibrary, setSelectedLibrary] = useState<string>("");
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [startTime, setStartTime] = useState<string>("");
-  const [endTime, setEndTime] = useState<string>("");
-  const [attendees, setAttendees] = useState<string>("");
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  // Redirect to login if not logged in
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const isLoggedIn = localStorage.getItem("loggedIn");
-      if (!isLoggedIn) {
-        router.push("/log_in"); // Redirect to login if not logged in
-      }
-    }
-  }, [router]);
-
-  // Dummy Libraries List
+  // Libraries List
   const libraries: string[] = [
     "Robarts Library",
     "Gerstein Library",
@@ -52,48 +32,66 @@ export default function Home() {
     "Regis College Library",
   ];
 
-  // Handle Room Search
-  const handleSearch = () => {
-    setLoading(true);
-    const hardcodedRooms: Room[] = [
-      {
-        id: 1,
-        library: "Robarts Library",
-        roomNumber: "203",
-        capacity: 6,
-        openTime: "09:00",
-        closeTime: "21:00",
-      },
-      {
-        id: 2,
-        library: "Gerstein Library",
-        roomNumber: "105",
-        capacity: 4,
-        openTime: "10:00",
-        closeTime: "20:00",
-      },
-      {
-        id: 3,
-        library: "E.J. Pratt Library",
-        roomNumber: "302",
-        capacity: 8,
-        openTime: "08:00",
-        closeTime: "22:00",
-      },
-    ];
+  // State Hooks
+  const [selectedLibrary, setSelectedLibrary] = useState<string>("");
+  const [startTime, setStartTime] = useState<string>("");
+  const [endTime, setEndTime] = useState<string>("");
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState<string>(""); // Initialize with an empty string
 
-    setTimeout(() => {
-      setRooms(hardcodedRooms);
+  // Redirect to login if not logged in
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isLoggedIn = localStorage.getItem("loggedIn");
+      if (!isLoggedIn) {
+        router.push("/log_in");
+      }
+    }
+  }, [router]);
+
+  // Handle Room Search
+  const handleSearch = async () => {
+    if (!selectedLibrary || !selectedDate || !startTime || !endTime) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          libraryName: selectedLibrary,
+          startTime,
+          endTime,
+          date: selectedDate,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setRooms(data.rooms);
+      } else {
+        alert(data.error || "No rooms available.");
+      }
+    } catch (error) {
+      console.error("Search error:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
-  // Handle Room Booking
   const handleBookRoom = (room: Room) => {
     alert(`You have booked Room ${room.roomNumber} at ${room.library}`);
   };
 
-  // Components
   const Header = () => (
     <header className={styles.header}>
       <Image
@@ -127,7 +125,7 @@ export default function Home() {
                 onChange={(e) => setSelectedLibrary(e.target.value)}
                 className={styles.input}
               >
-                <option value="">-- All Libraries --</option>
+                <option value="">-- Select a Library --</option>
                 {libraries.map((library) => (
                   <option key={library} value={library}>
                     {library}
@@ -148,7 +146,6 @@ export default function Home() {
             </label>
           </div>
         </div>
-
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
@@ -173,22 +170,6 @@ export default function Home() {
             </label>
           </div>
         </div>
-
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              Number of Attendees:
-              <input
-                type="number"
-                min="1"
-                value={attendees}
-                onChange={(e) => setAttendees(e.target.value)}
-                className={styles.input}
-              />
-            </label>
-          </div>
-        </div>
-
         <button type="button" onClick={handleSearch} className={styles.button}>
           Search Available Rooms
         </button>
@@ -207,8 +188,8 @@ export default function Home() {
               <div>
                 <strong>Library:</strong> {room.library} <br />
                 <strong>Room:</strong> {room.roomNumber} <br />
-                <strong>Capacity:</strong> {room.capacity} <br />
-                <strong>Available From:</strong> {room.openTime} - {room.closeTime}
+                <strong>Date:</strong> {room.date} <br />
+                <strong>Time:</strong> {room.startTime} - {room.endTime} <br />
               </div>
               <button
                 className={styles.bookButton}
@@ -224,6 +205,7 @@ export default function Home() {
       )}
     </div>
   );
+  
 
   const Footer = () => (
     <footer className={styles.footer}>
