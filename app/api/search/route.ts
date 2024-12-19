@@ -15,6 +15,7 @@ export async function POST(req: Request) {
     const result = await pool.query(
         `
         SELECT 
+          lr.id, -- Include the room ID
           lr.library_name AS libraryName,
           lr.room_number AS roomNumber,
           $4::DATE AS date,
